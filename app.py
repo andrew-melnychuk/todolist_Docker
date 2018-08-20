@@ -2,11 +2,13 @@ import os, sys, uuid
 from flask import Flask, Response, redirect, url_for, request, render_template, json
 from pymongo import MongoClient, errors
 
-from taskapp import taskRouter
-from userapp import userRouter
+from routes.taskapp import taskRouter
+from routes.userapp import userRouter
 
 app = Flask(__name__)
 
+
+app.static_url_path = '/static'
 app.secret_key = '5m[:e?}DP6ikFmAlPV3F'
 app.register_blueprint(taskRouter)
 app.register_blueprint(userRouter)
