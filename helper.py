@@ -1,8 +1,10 @@
+import os
 from flask import Response, json, session
 from pymongo import MongoClient
 
 client = MongoClient(
-    "mongodb://todouser:pass1word@ds219051.mlab.com:19051/totlist"
+#    "mongodb://todouser:pass1word@ds219051.mlab.com:19051/totlist"
+    os.environ['DB_PORT_27017_TCP_ADDR'], 27017
 )
 
 def is_session():

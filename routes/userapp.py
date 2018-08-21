@@ -31,3 +31,16 @@ def get_token():
     session.pop("WebAPIToken", None)
 
     return _send_list_JSON({"message": "User logged out"})
+
+@userRouter.route('/api/user/add', methods=['POST'])
+def add_new_user():
+    jsonbody = request.get_json()
+    if ("username" in jsonbody) and ("password" in jsonbody):
+        result = db.users.insert_one(jsonbody)
+
+        document = dict()
+        document = db.users.find_one({"_id": result.inserted_id})
+        document["id"] = str(document["_id"])
+        del document["_id"]
+
+        return _send_list_JSON(document, 201)

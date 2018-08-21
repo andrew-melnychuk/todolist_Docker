@@ -5,3 +5,12 @@ web:
     - "5000:5000"
   volumes:
     - .:/todo
+
+  links:
+    - db
+
+db:
+  image: mongo:3.2.0
+  restart: always
+  volumes:
+    - ./db/data:/db/data
