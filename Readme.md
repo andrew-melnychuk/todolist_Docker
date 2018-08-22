@@ -6,7 +6,9 @@
  - install docker-compose
  - clone repository
  - run docker-compose from terminal:
- ``` docker-compose up -d
+ ```sh
+$ docker-compose build
+$ docker-compose up -d
  ```
  - for acces to application use http://localhost:5000/ from your browser
 
