@@ -25,6 +25,8 @@
 //   elem.classList.toggle('fa-chevron-down');
 // });
 
+
+
 class LoginPage {
   constructor() {
     this.username = '';
@@ -90,7 +92,7 @@ class LoginPage {
         <form >
           <input id="username" type="text" placeholder="Username">
           <input id="password" type="password" placeholder="Password">
-         <button id="login-btn" type="submit">Sign In</button>
+          <button id="login-btn" type="submit">Sign In</button>
        </form>
        <p>New here? <a href="#" id="sign-up">Sign up now</a>.</p>
       </div>`
