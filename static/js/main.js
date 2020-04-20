@@ -32,6 +32,7 @@ class LoginPage {
     this.username = '';
     this.password = '';
     this.token = '';
+    this.id = '';
     this.response = '';
   }
 
@@ -59,10 +60,8 @@ class LoginPage {
 
     if (response.ok) {
       let result = await response.json();
-      console.log(result.WebAPIToken);
       this.token = result.WebAPIToken;
-      console.log(this.token);
-
+      // як сюди привязать щоб загружався TaskList це ж має бути метод іншого класу ???
     } else {
       let result = await response.json();
       console.log(result.error);
@@ -88,8 +87,9 @@ class LoginPage {
 
     if (response.ok) {
       let result = await response.json();
-      this.render()
-      console.log(result);
+      this.id = result.id;
+      alert('Congrats, you have created an account.');
+      this.render();
     } else {
       let result = await response.json();
       console.log(result.error);
@@ -106,7 +106,8 @@ class LoginPage {
           <button id="register-btn" type="submit" data-action="register">Sign Up</button>
         </form>
         <p>Have an account? <span id="sign-in" data-action="render">Sign in</span>.</p>
-      </div>`
+      </div>`;
+
     let elem = document.getElementById('content');
     elem.innerHTML = registerform;
 
@@ -127,7 +128,7 @@ class LoginPage {
           <button id="login-btn" type="submit" data-action="login">Sign In</button>
        </form>
        <p>New here? <span id="sign-up" data-action="signUp">Sign up now</span>.</p>
-      </div>`
+      </div>`;
 
     let elem = document.getElementById('content');
     elem.innerHTML = loginform;
