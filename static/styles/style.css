@@ -72,8 +72,9 @@ h2 {
   text-align: center;
 }
 
-.login p a,
-.register p a {
+.login p #sign-up,
+.register p #sign-in {
+  cursor: pointer;
   text-decoration: none;
   color: #fff;
 }

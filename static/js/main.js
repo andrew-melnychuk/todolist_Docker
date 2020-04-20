@@ -40,7 +40,7 @@ class LoginPage {
     this[method](event);
   }
 
-  async onClick() {
+  async login() {
     this.username = document.getElementById('username').value;
     this.password = document.getElementById('password').value;
 
@@ -59,52 +59,94 @@ class LoginPage {
 
     if (response.ok) {
       let result = await response.json();
-      console.log('succesfully entered');
+      console.log(result.WebAPIToken);
+      this.token = result.WebAPIToken;
+      console.log(this.token);
+
     } else {
       let result = await response.json();
       console.log(result.error);
     }
   }
 
-  // onClick() {
-  //   this.username = document.getElementById('username').value;
-  //   this.password = document.getElementById('password').value;
+  async register() {
+    this.username = document.getElementById('username').value;
+    this.password = document.getElementById('password').value;
 
-  //   let xhr = new XMLHttpRequest();
-  //   xhr.onreadystatechange = () => {
-  //     if (xhr.readyState == 4 && xhr.status == 200) {
-  //       let response = JSON.parse(xhr.responseText);
-  //     } else if (xhr.readyState == 4 && xhr.status !== 200) {
-  //       let response = JSON.parse(xhr.responseText);
-  //       console.log(response.error);
-  //     }
-  //   }
+    let user = {
+      username: this.username,
+      password: this.password
+    }
 
-  //   xhr.open("POST", "/api/auth", true);
-  //   xhr.setRequestHeader("Content-Type", "application/json");
-  //   xhr.send(JSON.stringify({ username: this.username, password: this.password }));
-  // }
+    let response = await fetch('/api/user/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(user)
+    });
+
+    if (response.ok) {
+      let result = await response.json();
+      this.render()
+      console.log(result);
+    } else {
+      let result = await response.json();
+      console.log(result.error);
+    }
+  }
+
+  signUp() {
+    let registerform = `
+      <div class="register" id="register-form">
+        <h2>Sign Up</h2>
+        <form>
+          <input id="username" type="text" placeholder="Username" required minlength="4" maxlength="30">
+          <input id="password" type="password" placeholder="Password" required minlength="6">
+          <button id="register-btn" type="submit" data-action="register">Sign Up</button>
+        </form>
+        <p>Have an account? <span id="sign-in" data-action="render">Sign in</span>.</p>
+      </div>`
+    let elem = document.getElementById('content');
+    elem.innerHTML = registerform;
+
+    let signIn = document.getElementById('sign-in');
+    signIn.addEventListener('click', loginPage);
+
+    let register = document.getElementById('register-btn');
+    register.addEventListener('click', loginPage);
+  }
 
   render() {
     let loginform = `
       <div class="login" id="login-form">
         <h2>Sign In</h2>
         <form >
-          <input id="username" type="text" placeholder="Username">
-          <input id="password" type="password" placeholder="Password">
-          <button id="login-btn" type="submit">Sign In</button>
+          <input id="username" type="text" placeholder="Username" required minlength="4" maxlength="30">
+          <input id="password" type="password" placeholder="Password" required minlength="6">
+          <button id="login-btn" type="submit" data-action="login">Sign In</button>
        </form>
-       <p>New here? <a href="#" id="sign-up">Sign up now</a>.</p>
+       <p>New here? <span id="sign-up" data-action="signUp">Sign up now</span>.</p>
       </div>`
 
     let elem = document.getElementById('content');
     elem.innerHTML = loginform;
+
+    let signUp = document.getElementById('sign-up');
+    signUp.addEventListener('click', loginPage);
+
+    let btn = document.getElementById('login-btn');
+    btn.addEventListener('click', loginPage);
+  }
+
+  onClick() {
+    let action = event.target.dataset.action;
+    if (action) {
+      this[action]();
+    }
   }
 }
 
 let loginPage = new LoginPage();
 
 loginPage.render();
-
-let btn = document.getElementById('login-btn');
-btn.addEventListener('click', loginPage);
