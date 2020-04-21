@@ -48,7 +48,7 @@ class LoginPage extends MainPage {
       this.token = result.WebAPIToken;
       console.log(`LoginPage, Token: ${this.token}`);
 
-      // як сюди привязать щоб загружався render(), рядок 189 ???
+      // як сюди привязать щоб загружався render() з рядка 189 ???
     } else {
       let result = await response.json();
       console.log(`LoginPage, error: ${result.error}`); //response.error ???
