@@ -299,3 +299,5 @@ class TaskList extends MainPage {
 let main = new MainPage();
 let loginPage = new LoginPage();
 let taskList = new TaskList();
+
+loginPage.render();
