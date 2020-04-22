@@ -241,6 +241,8 @@ class TaskList extends MainPage {
     addBtn.addEventListener("click", taskList);
   }
 
+
+  // DOES NOT WORK  WHYYYYY ???
   addTask() {
     let taskDate = document.querySelector('#add-item .date');
     let taskName = document.querySelector('#add-item #name');
@@ -265,6 +267,7 @@ class TaskList extends MainPage {
       if (response.ok) {
         let result = await response.json();
         this.tasks.push(result);
+        // add html task here
         console.log(`Task List, add task message: ${result.message}`);
       } else {
         let result = await response.json();
@@ -282,7 +285,11 @@ class TaskList extends MainPage {
       elemDescription.classList.toggle('display-none');
     } else if (elem.classList.contains('delete')) {
 
+
+      // DOES NOT WORK  WHYYYYY ???
       async () => {
+        console.log('lol');
+
         let body = {
           WebAPIToken: obj.token,
           task_id: idexapmle // change this
