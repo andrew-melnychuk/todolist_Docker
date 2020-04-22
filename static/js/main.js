@@ -1,3 +1,7 @@
+let obj = {
+  token: ''
+}
+
 class MainPage {
   constructor() {
     this.token = '';
@@ -19,6 +23,7 @@ class LoginPage extends MainPage {
     this.password = '';
     this.id = '';
     this.response = '';
+    this.tl = new TaskList();
   }
 
   handleEvent(event) {
@@ -46,14 +51,16 @@ class LoginPage extends MainPage {
     if (response.ok) {
       let result = await response.json();
       this.token = result.WebAPIToken;
+      obj.token = this.token;
       console.log(`LoginPage, Token: ${this.token}`);
-
-      // як сюди привязать щоб загружався render() з рядка 189 ???
+      this.tl.getTasks();
     } else {
       let result = await response.json();
-      console.log(`LoginPage, error: ${result.error}`); //response.error ???
+      console.log(`LoginPage, error: ${result.error}`);
     }
   }
+
+
 
   async register() {
     this.username = document.getElementById('username').value;
@@ -79,7 +86,7 @@ class LoginPage extends MainPage {
       this.render();
     } else {
       let result = await response.json();
-      console.log(`LoginPage, error: ${result.error}`); //response.error ???
+      console.log(`LoginPage, error: ${result.error}`);
     }
   }
 
@@ -152,39 +159,59 @@ class TaskList extends MainPage {
     if (response.ok) {
       let result = await response.json();
       this.tasks = result;
-      console.log(`Task List, Tasks${tasks}`);
+      console.log(`Task List, Tasks${this.tasks}`);
       this.render();
     } else {
-      console.log(`Task List, error ${response.error}`);  //response.error ???
+      console.log(`Task List, error ${response.error}`);
     }
   }
 
   render() {
+    console.log(this.tasks);
+
     let itemList = `
     <div id="item-list">
     <ul id="list">`;
 
-    for (let i = 0; i < this.tasks.length; i++) {
-      itemList += `
-      <li class="item">
-        <div class="item-head flex">
-          <p class="date">${task[i].date}</p>
-          <p class="name">${task[i].name}</p>
-          <i class="fa fa-trash-o delete"></i>
-        </div>
-        <p class="item-body display-none">${task[i].description}</p>
-      </li>`;
-    }
+    itemList += `
+    <li class="item">
+    <div class="item-head flex">
+      <p class="date">1</p>
+      <p class="name" data-action="item">2</p>
+      <i class="fa fa-trash-o delete" data-action="item"></i>
+    </div>
+    <p class="item-body display-none">3</p>
+    </li>
+    <li class="item">
+    <div class="item-head flex">
+      <p class="date">1</p>
+      <p class="name" data-action="item">2</p>
+      <i class="fa fa-trash-o delete" data-action="item"></i>
+    </div>
+    <p class="item-body display-none">3</p>
+    </li>`
 
-    //   this.tasks.forEach(task => list += `
+    // for (let i = 0; i < this.tasks.length; i++) {
+    //   itemList += `
     //   <li class="item">
-    //   <div class="item-head flex">
-    //     <p class="date">${task.date}</p>
-    //     <p class="name">${task.name}</p>
-    //     <i class="fa fa-trash-o delete"></i>
-    //   </div>
-    //   <p class="item-body">${task.description}</p>
-    // </li>`);
+    //     <div class="item-head flex">
+    //       <p class="date">${task[i].date}</p>
+    //       <p class="name" data-action="item">${task[i].name}</p>
+    //       <i class="fa fa-trash-o delete" data-action="item"></i>
+    //     </div>
+    //     <p class="item-body display-none">${task[i].description}</p>
+    //   </li>`;
+    // }
+
+    this.tasks.forEach(task => list += `
+      <li class="item">
+      <div class="item-head flex">
+        <p class="date" data-action="item">${task.date}</p>
+        <p class="name">${task.name}</p>
+        <i class="fa fa-trash-o delete" data-action="item"></i>
+      </div>
+      <p class="item-body display-none">${task.description}</p>
+    </li>`);
 
     itemList += `
       </ul>
@@ -195,33 +222,36 @@ class TaskList extends MainPage {
           </div>
           <div class="flex">
             <textarea id="description"></textarea>
-            <button type="submit" id="add-btn"><i class="fas fa-plus"></i></button>
+            <button id="add-btn" data-action="addTask"><i class="fas fa-plus"></i></button>
           </div>
         </form>
-        <button id="add-item-btn" data-action="arrowBtn"><i class="fas fa-chevron-down"></i></button>
+        <button id="add-item-btn" data-action="arrowBtn"><i class="fas fa-chevron-down" data-action="arrowBtn"></i></button>
       </div>`;
 
     let elem = document.getElementById('content');
-    elem.innerHTML = list;
+    elem.innerHTML = itemList;
 
     let arrowButton = document.querySelector('#add-item-btn i');
     arrowButton.addEventListener("click", taskList);
 
     let list = document.getElementById('list');
     list.addEventListener("click", taskList);
+
+    let addBtn = document.getElementById('add-btn');
+    addBtn.addEventListener("click", taskList);
   }
 
-  addTask(task) {
-    let taskDate = task.date;
-    let taskName = task.name;
-    let taskDescription = task.description;
+  addTask() {
+    let taskDate = document.querySelector('#add-item .date');
+    let taskName = document.querySelector('#add-item #name');
+    let taskDescription = document.querySelector('#add-item #description');
 
     async () => {
       let body = {
-        WebAPIToken: this.token,
-        date: taskDate,
+        WebAPIToken: obj.token,
         name: taskName,
-        description: taskDescription
+        description: taskDescription,
+        date: taskDate
       }
 
       let response = await fetch('/api/tasks', {
@@ -235,10 +265,10 @@ class TaskList extends MainPage {
       if (response.ok) {
         let result = await response.json();
         this.tasks.push(result);
-        console.log(`Task List, add task message: ${result.message}`);  //response.message ???
+        console.log(`Task List, add task message: ${result.message}`);
       } else {
         let result = await response.json();
-        console.log(`Task List, add task error: ${result.error}`);  //response.error ???
+        console.log(`Task List, add task error: ${result.error}`);
       }
     }
   }
@@ -251,9 +281,10 @@ class TaskList extends MainPage {
     if (elem.classList.contains('name') && elemDescription != null) {
       elemDescription.classList.toggle('display-none');
     } else if (elem.classList.contains('delete')) {
+
       async () => {
         let body = {
-          WebAPIToken: this.token,
+          WebAPIToken: obj.token,
           task_id: idexapmle // change this
         }
 
@@ -267,10 +298,10 @@ class TaskList extends MainPage {
 
         if (response.ok) {
           let result = await response.json();
-          console.log(`Task List, delete task message: ${result.message}`);  //response.message ???
+          console.log(`Task List, delete task message: ${result.message}`);
         } else {
           let result = await response.json();
-          console.log(`Task List, error: ${result.error}`);  //response.error ???
+          console.log(`Task List, error: ${result.error}`);
         }
       }
 
@@ -297,7 +328,7 @@ class TaskList extends MainPage {
 }
 
 let main = new MainPage();
-let loginPage = new LoginPage();
 let taskList = new TaskList();
+let loginPage = new LoginPage();
 
 loginPage.render();
