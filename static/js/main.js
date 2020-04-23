@@ -1,29 +1,14 @@
-let obj = {
+const tokenHolder = {
   token: ''
 }
 
-class MainPage {
+const tasksHolder = {};
+
+class LoginPage {
   constructor() {
-    this.token = '';
-  }
-
-  setToken(value) {
-    this.token = value;
-  }
-
-  getToken() {
-    return this.token;
-  }
-}
-
-class LoginPage extends MainPage {
-  constructor(token) {
-    super(token);
     this.username = '';
     this.password = '';
-    this.id = '';
-    this.response = '';
-    this.tl = new TaskList();
+    this.taskListInstance = new TaskList();
   }
 
   handleEvent(event) {
@@ -51,16 +36,13 @@ class LoginPage extends MainPage {
     if (response.ok) {
       let result = await response.json();
       this.token = result.WebAPIToken;
-      obj.token = this.token;
-      console.log(`LoginPage, Token: ${this.token}`);
-      this.tl.getTasks();
+      tokenHolder.token = this.token;
+      this.taskListInstance.getTasks();
     } else {
       let result = await response.json();
       console.log(`LoginPage, error: ${result.error}`);
     }
   }
-
-
 
   async register() {
     this.username = document.getElementById('username').value;
@@ -142,10 +124,9 @@ class LoginPage extends MainPage {
   }
 }
 
-class TaskList extends MainPage {
-  constructor(token) {
-    super(token);
-    this.tasks = new Array();
+class TaskList {
+  constructor() {
+    this.tasks = new Array();  // probably can delete
   }
 
   handleEvent(event) {
@@ -158,8 +139,8 @@ class TaskList extends MainPage {
 
     if (response.ok) {
       let result = await response.json();
-      this.tasks = result;
-      console.log(`Task List, Tasks${this.tasks}`);
+      this.tasks = result;  // probably can delete
+      tasksHolder.tasks = result;
       this.render();
     } else {
       console.log(`Task List, error ${response.error}`);
@@ -167,47 +148,15 @@ class TaskList extends MainPage {
   }
 
   render() {
-    console.log(this.tasks);
-
     let itemList = `
     <div id="item-list">
     <ul id="list">`;
 
-    itemList += `
-    <li class="item">
-    <div class="item-head flex">
-      <p class="date">1</p>
-      <p class="name" data-action="item">2</p>
-      <i class="fa fa-trash-o delete" data-action="item"></i>
-    </div>
-    <p class="item-body display-none">3</p>
-    </li>
-    <li class="item">
-    <div class="item-head flex">
-      <p class="date">1</p>
-      <p class="name" data-action="item">2</p>
-      <i class="fa fa-trash-o delete" data-action="item"></i>
-    </div>
-    <p class="item-body display-none">3</p>
-    </li>`
-
-    // for (let i = 0; i < this.tasks.length; i++) {
-    //   itemList += `
-    //   <li class="item">
-    //     <div class="item-head flex">
-    //       <p class="date">${task[i].date}</p>
-    //       <p class="name" data-action="item">${task[i].name}</p>
-    //       <i class="fa fa-trash-o delete" data-action="item"></i>
-    //     </div>
-    //     <p class="item-body display-none">${task[i].description}</p>
-    //   </li>`;
-    // }
-
-    this.tasks.forEach(task => list += `
-      <li class="item">
+    tasksHolder.tasks.forEach(task => itemList += `
+      <li class="item" id="${task.id}">
       <div class="item-head flex">
-        <p class="date" data-action="item">${task.date}</p>
-        <p class="name">${task.name}</p>
+        <p class="date">${task.date}</p>
+        <p class="name" data-action="item">${task.name}</p>
         <i class="fa fa-trash-o delete" data-action="item"></i>
       </div>
       <p class="item-body display-none">${task.description}</p>
@@ -222,10 +171,10 @@ class TaskList extends MainPage {
           </div>
           <div class="flex">
             <textarea id="description"></textarea>
-            <button id="add-btn" data-action="addTask"><i class="fas fa-plus"></i></button>
+            <button type="button" id="add-btn" data-action="addTask"><i class="fas fa-plus" data-action="addTask"></i></button>
           </div>
         </form>
-        <button id="add-item-btn" data-action="arrowBtn"><i class="fas fa-chevron-down" data-action="arrowBtn"></i></button>
+        <button id="add-item-btn"><i class="fas fa-chevron-down" data-action="arrowBtn"></i></button>
       </div>`;
 
     let elem = document.getElementById('content');
@@ -241,19 +190,18 @@ class TaskList extends MainPage {
     addBtn.addEventListener("click", taskList);
   }
 
-
-  // DOES NOT WORK  WHYYYYY ???
+  // DOES NOT WORK WITH BTN WHYYYYY ???
   addTask() {
     let taskDate = document.querySelector('#add-item .date');
     let taskName = document.querySelector('#add-item #name');
     let taskDescription = document.querySelector('#add-item #description');
 
-    async () => {
+    (async () => {
       let body = {
-        WebAPIToken: obj.token,
-        name: taskName,
-        description: taskDescription,
-        date: taskDate
+        WebAPIToken: tokenHolder.token,
+        name: taskName.value,
+        description: taskDescription.value,
+        date: taskDate.value
       }
 
       let response = await fetch('/api/tasks', {
@@ -266,36 +214,51 @@ class TaskList extends MainPage {
 
       if (response.ok) {
         let result = await response.json();
-        this.tasks.push(result);
+        this.tasks.push(result); // probably can delete
+        tasksHolder.tasks.push(result);
+        console.log(result);
+
+
         // add html task here
-        console.log(`Task List, add task message: ${result.message}`);
+
+        let elem = document.getElementById('list');
+        elem.insertAdjacentHTML('beforeend', `
+          <li class="item" id="${result.id}">
+            <div class="item-head flex">
+              <p class="date">${result.date}</p>
+              <p class="name" data-action="item">${result.name}</p>
+              <i class="fa fa-trash-o delete" data-action="item"></i>
+            </div>
+            <p class="item-body display-none">${result.description}</p>
+          </li>`);
+
+        // clear add-item form
+        taskDate.value = '';
+        taskName.value = '';
+        taskDescription.value = '';
       } else {
         let result = await response.json();
         console.log(`Task List, add task error: ${result.error}`);
       }
-    }
+    })();
   }
 
   item() {
     let elem = event.target;
     let elemDescription = elem.parentElement.nextElementSibling;
-    let task = elem.parentElement.parentElement;
+    let item = elem.parentElement.parentElement;
 
     if (elem.classList.contains('name') && elemDescription != null) {
       elemDescription.classList.toggle('display-none');
     } else if (elem.classList.contains('delete')) {
 
-
-      // DOES NOT WORK  WHYYYYY ???
-      async () => {
-        console.log('lol');
-
+      (async () => {
         let body = {
-          WebAPIToken: obj.token,
-          task_id: idexapmle // change this
+          WebAPIToken: tokenHolder.token,
+          task_id: item.id
         }
 
-        let response = await fetch('/api/tasks/taskid', {
+        let response = await fetch(`/api/tasks/${item.id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -306,13 +269,13 @@ class TaskList extends MainPage {
         if (response.ok) {
           let result = await response.json();
           console.log(`Task List, delete task message: ${result.message}`);
+          item.remove();
+          tasksHolder.tasks.splice(tasksHolder.tasks.findIndex(a => a.id == item.id), 1);
         } else {
           let result = await response.json();
           console.log(`Task List, error: ${result.error}`);
         }
-      }
-
-      task.remove();
+      })();
     }
   }
 
@@ -334,7 +297,6 @@ class TaskList extends MainPage {
 
 }
 
-let main = new MainPage();
 let taskList = new TaskList();
 let loginPage = new LoginPage();
 
