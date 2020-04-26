@@ -4,6 +4,9 @@ const tokenHolder = {
 
 const tasksHolder = {};
 
+
+const userInfoHolder = {};
+
 class LoginPage {
   constructor() {
     this.username = '';
@@ -37,6 +40,8 @@ class LoginPage {
       let result = await response.json();
       this.token = result.WebAPIToken;
       tokenHolder.token = this.token;
+      userInfoHolder.name = this.username;
+      userInfoHolder.password = this.password;
       this.taskListInstance.getTasks();
     } else {
       let result = await response.json();
@@ -65,7 +70,7 @@ class LoginPage {
       let result = await response.json();
       this.id = result.id;
       alert('Congrats, you have created an account.');
-      this.render();
+      location.reload();
     } else {
       let result = await response.json();
       console.log(`LoginPage, error: ${result.error}`);
@@ -79,12 +84,12 @@ class LoginPage {
         <form>
           <input id="username" type="text" placeholder="Username" required minlength="4" maxlength="30">
           <input id="password" type="password" placeholder="Password" required minlength="6">
-          <button id="register-btn" type="submit" data-action="register">Sign Up</button>
+          <button id="register-btn" data-action="register">Sign Up</button>
         </form>
         <p>Have an account? <span id="sign-in" data-action="render">Sign in</span>.</p>
       </div>`;
 
-    let elem = document.getElementById('content');
+    let elem = document.querySelector('body');
     elem.innerHTML = registerform;
 
     let signIn = document.getElementById('sign-in');
@@ -99,14 +104,14 @@ class LoginPage {
       <div class="login" id="login-form">
         <h2>Sign In</h2>
         <form >
-          <input id="username" type="text" placeholder="Username" required minlength="4" maxlength="30">
-          <input id="password" type="password" placeholder="Password" required minlength="6">
-          <button id="login-btn" type="submit" data-action="login">Sign In</button>
+          <input id="username" type="text" placeholder="Username">
+          <input id="password" type="password" placeholder="Password">
+          <button id="login-btn" type="button" data-action="login">Sign In</button>
        </form>
        <p>New here? <span id="sign-up" data-action="signUp">Sign up now</span>.</p>
       </div>`;
 
-    let elem = document.getElementById('content');
+    let elem = document.querySelector('body');
     elem.innerHTML = loginform;
 
     let signUp = document.getElementById('sign-up');
@@ -148,15 +153,28 @@ class TaskList {
   }
 
   render() {
+    let now = new Date();
+    let day = { weekday: "long" };
+    let monthEndDate = { month: "short", day: "numeric" };
+
     let itemList = `
-    <div id="item-list">
-    <ul id="list">`;
+    <div id="wrapper">
+      <header id="header">
+      <div id="user">
+        <p id="current-user">${userInfoHolder.name}</p>
+        <button id="logout" data-action="logout"><i class="fas fa-sign-out-alt" data-action="logout"></i></button>
+      </div>
+      <p id="current-date">${now.toLocaleDateString("en-Us", day)}<span>, </span>${now.toLocaleDateString("en-Us", monthEndDate)}</p>
+      </header>
+      <div id="item-list">
+        <ul id="list">`;
 
     tasksHolder.tasks.forEach(task => itemList += `
       <li class="item" id="${task.id}">
       <div class="item-head flex">
         <p class="date">${task.date}</p>
-        <p class="name" data-action="item">${task.name}</p>
+        <i class="fas fa-caret-down"  data-action="item"></i>
+        <p class="name">${task.name}</p>
         <i class="fa fa-trash-o delete" data-action="item"></i>
       </div>
       <p class="item-body display-none">${task.description}</p>
@@ -166,8 +184,8 @@ class TaskList {
       </ul>
         <form id="add-item" class="add-item  display-none" method="post">
           <div class="flex">
-            <input type="text" class="date" placeholder="Date">
-            <input type="text" id="name" placeholder="Name">
+            <input type="text" class="date" placeholder="Date" required minlength="1">
+            <input type="text" id="name" placeholder="Name" required minlength="1">
           </div>
           <div class="flex">
             <textarea id="description"></textarea>
@@ -175,9 +193,10 @@ class TaskList {
           </div>
         </form>
         <button id="add-item-btn"><i class="fas fa-chevron-down" data-action="arrowBtn"></i></button>
+      </div>
       </div>`;
 
-    let elem = document.getElementById('content');
+    let elem = document.querySelector('body');
     elem.innerHTML = itemList;
 
     let arrowButton = document.querySelector('#add-item-btn i');
@@ -188,59 +207,68 @@ class TaskList {
 
     let addBtn = document.getElementById('add-btn');
     addBtn.addEventListener("click", taskList);
+
+    let logout = document.getElementById('logout');
+    logout.addEventListener("click", taskList);
   }
 
-  // DOES NOT WORK WITH BTN WHYYYYY ???
+  // DOES NOT WORK WITH BTN TYPE=SUBMIT WHYYYYY ???
   addTask() {
     let taskDate = document.querySelector('#add-item .date');
-    let taskName = document.querySelector('#add-item #name');
-    let taskDescription = document.querySelector('#add-item #description');
+    let taskName = document.getElementById('name');
+    let taskDescription = document.getElementById('description');
 
-    (async () => {
-      let body = {
-        WebAPIToken: tokenHolder.token,
-        name: taskName.value,
-        description: taskDescription.value,
-        date: taskDate.value
-      }
+    if (taskDate.value != '' && taskName.value != '') {
 
-      let response = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
+      (async () => {
+        let body = {
+          WebAPIToken: tokenHolder.token,
+          name: taskName.value,
+          description: taskDescription.value,
+          date: taskDate.value
+        }
 
-      if (response.ok) {
-        let result = await response.json();
-        this.tasks.push(result); // probably can delete
-        tasksHolder.tasks.push(result);
-        console.log(result);
+        let response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
 
+        if (response.ok) {
+          let result = await response.json();
+          this.tasks.push(result); // probably can delete
+          tasksHolder.tasks.push(result);
+          console.log(result);
 
-        // add html task here
+          // add html task here
 
-        let elem = document.getElementById('list');
-        elem.insertAdjacentHTML('beforeend', `
+          let elem = document.getElementById('list');
+          elem.insertAdjacentHTML('beforeend', `
           <li class="item" id="${result.id}">
             <div class="item-head flex">
               <p class="date">${result.date}</p>
-              <p class="name" data-action="item">${result.name}</p>
+              <i class="fas fa-caret-down"  data-action="item"></i>
+              <p class="name">${result.name}</p>
               <i class="fa fa-trash-o delete" data-action="item"></i>
             </div>
             <p class="item-body display-none">${result.description}</p>
           </li>`);
 
-        // clear add-item form
-        taskDate.value = '';
-        taskName.value = '';
-        taskDescription.value = '';
-      } else {
-        let result = await response.json();
-        console.log(`Task List, add task error: ${result.error}`);
-      }
-    })();
+          // clear add-item form
+          taskDate.value = '';
+          taskName.value = '';
+          taskDescription.value = '';
+        } else {
+          let result = await response.json();
+          console.log(`Task List, add task error: ${result.error}`);
+        }
+
+      })();
+    } else {
+      console.log('provide Name and Date');
+    }
   }
 
   item() {
@@ -248,8 +276,18 @@ class TaskList {
     let elemDescription = elem.parentElement.nextElementSibling;
     let item = elem.parentElement.parentElement;
 
-    if (elem.classList.contains('name') && elemDescription != null) {
+
+    if ((elem.classList.contains('fa-caret-down') && elemDescription.innerHTML != '') || (elem.classList.contains('fa-caret-up') && elemDescription.innerHTML != '')) {
+
+      let margin = elem.previousElementSibling.offsetWidth;
+      let width = elem.nextElementSibling.offsetWidth;
+
+      elemDescription.style.margin = `0px 0px 0px ${margin + 44}px`;
+      elemDescription.style.width = `${width}px`;
+
       elemDescription.classList.toggle('display-none');
+      elem.classList.toggle('fa-caret-up');
+      elem.classList.toggle('fa-caret-down');
     } else if (elem.classList.contains('delete')) {
 
       (async () => {
@@ -279,6 +317,20 @@ class TaskList {
     }
   }
 
+  async logout() {
+    let response = await fetch('/api/auth/out');
+
+    if (response.ok) {
+      let result = await response.json();
+      console.log(result.message);
+      location.reload();
+    } else {
+      let result = await response.json();
+      console.log(result.error);
+    }
+
+  }
+
   arrowBtn() {
     let elem = event.target;
     let addItemForm = document.getElementById('add-item');
@@ -294,7 +346,6 @@ class TaskList {
       this[action]();
     }
   }
-
 }
 
 let taskList = new TaskList();

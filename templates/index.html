@@ -11,32 +11,58 @@
 </head>
 
 <body>
+  <div id="wrapper">
 
-  <div id="content">
-    <!-- <div id="item-list">
-      <ul id="list">
-        <li class="item" data-action="item">
-          <div class="item-head flex">
-            <p class="date">1</p>
-            <p class="name">2</p>
-            <i class="fa fa-trash-o delete"></i>
+    <!-- <header id="header">
+      <div id="user">
+        <p id="current-user">Andrew</p>
+        <button id="logout"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+      <p id="current-date">Saturday<span>, </span>Apr 24</p>
+    </header> -->
+
+    <main id="content">
+      <!-- <div id="item-list">
+        <ul id="list">
+          <li class="item" id="${task.id}">
+            <div class="item-head flex">
+              <p class="date">24.04</p>
+              <p class="name" data-action="item">Task name</p>
+              <i class="fa fa-trash-o delete" data-action="item"></i>
+            </div>
+            <p class="item-body display-none">description</p>
+          </li>
+          <li class="item" id="${task.id}">
+            <div class="item-head flex">
+              <p class="date">24.04</p>
+              <p class="name" data-action="item">Task name</p>
+              <i class="fa fa-trash-o delete" data-action="item"></i>
+            </div>
+            <p class="item-body display-none">description</p>
+          </li>
+          <li class="item" id="${task.id}">
+            <div class="item-head flex">
+              <p class="date">24.04</p>
+              <p class="name" data-action="item">Task name</p>
+              <i class="fa fa-trash-o delete" data-action="item"></i>
+            </div>
+            <p class="item-body display-none">description</p>
+          </li>
+        </ul>
+        <form id="add-item" class="add-item  display-none" method="post">
+          <div class="flex">
+            <input type="text" class="date" placeholder="Date">
+            <input type="text" id="name" placeholder="Name">
           </div>
-          <p class="item-body display-none">3</p>
-        </li>
-      </ul>
-      <form id="add-item" class="add-item  display-none" method="post">
-        <div class="flex">
-          <input type="text" class="date" placeholder="Date">
-          <input type="text" id="name" placeholder="Name">
-        </div>
-        <div class="flex">
-          <textarea id="description"></textarea>
-          <button type="submit" id="add-btn"><i class="fas fa-plus"></i></button>
-        </div>
-      </form>
-      <button id="add-item-btn" data-action="arrowBtn"><i class="fas fa-chevron-down"
-          data-action="arrowBtn"></i></button>
-    </div> -->
+          <div class="flex">
+            <textarea id="description"></textarea>
+            <button type="button" id="add-btn" data-action="addTask"><i class="fas fa-plus"
+                data-action="addTask"></i></button>
+          </div>
+        </form>
+        <button id="add-item-btn"><i class="fas fa-chevron-down" data-action="arrowBtn"></i></button>
+      </div> -->
+    </main>
   </div>
 
   <script src="/static/js/main.js"></script>
